@@ -23,15 +23,13 @@ services:
         target: /data
         bind:
           propagation: shared
+      - type: bind
+        source: /DATA/AppData/rclone/start-rclone.sh
+        target: /start-rclone.sh
+        read_only: true
+    entrypoint: ["/bin/sh"]
     command:
-      - rcd
-      - --rc-web-gui
-      - --rc-addr
-      - :5572
-      - --rc-no-auth
-      - --rc-web-gui-no-open-browser
-      - --config
-      - /config/rclone/rclone.conf
+      - /start-rclone.sh
     devices:
       - /dev/fuse:/dev/fuse
     cap_add:
