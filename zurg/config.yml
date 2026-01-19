@@ -4,22 +4,15 @@ zurg: v1
 token: yourtoken
 
 # Optional: Network settings
-# host: "[::]"  # Listen on all interfaces
-# port: 9999    # WebDAV port (default: 9999)
-# username:     # Basic auth username (optional)
-# password:     # Basic auth password (optional)
-
+# host: 0.0.0.0
+# port: 9999
 # Optional: Performance settings
 # concurrent_workers: 20    # Number of concurrent workers
-check_for_changes_every_secs: 10  # How often to check for library changes
+check_for_changes_every_secs: 10    # How often to check for library changes
 
-# Optional: Repair settings
-# repair_every_mins: 60     # How often to repair the library
-# ignore_renames: false     # Ignore file renames
-# retain_rd_torrent_name: false     # Keep Real-Debrid torrent names
-# retain_folder_name_extension: false
-enable_repair: true         # Enable automatic repair
-auto_delete_rar_torrents: true     # Auto-delete RAR torrents
+# Torrent name settings
+# retain_rd_torrent_name: true
+# retain_folder_name_extension: true
 
 # Optional: API settings
 # api_timeout_secs: 15
@@ -33,35 +26,45 @@ auto_delete_rar_torrents: true     # Auto-delete RAR torrents
 # verify_download_link: false
 # force_ipv6: false
 
-# Optional: Plex integration (for automatic library updates)
-# Uncomment the line below to enable Plex updates
-# on_library_update: sh plex_update.sh "$@"
+# Enable repair for incomplete torrents
+enable_repair: true    # Enable automatic repair
+auto_delete_rar_torrents: true    # Auto-delete RAR torrents
 
-# Directory structure configuration
-# This defines how your media will be organized
+# Serve files from rclone mount
+# Plex integration (for automatic library updates)
+serve_from_rclone: true
+on_library_update: sh plex_update.sh "$@"
+
+# Directory organization
 directories:
-  # Anime directory - filters for anime content
-  anime:
-    group_order: 10
-    group: media
-    filters:
-      - regex: /\b[a-fA-F0-9]{8}\b/
-      - any_file_inside_regex: /\b[a-fA-F0-9]{8}\b/
-
   # TV Shows directory - filters for episodic content
   shows:
-    group_order: 20
-    group: media
+    group: shows
+    group_order: 10
     filters:
       - has_episodes: true
-
+      - or:
+          - regex: /S\d{2}E\d{2}/i   # S01E01 pattern
+          - regex: /\d{1,2}x\d{2}/i  # 1x01 pattern
+          - regex: /Season.\d+/i     # Matches Season 1
+ 
+  # DVD Extras - separate folder
+  extras:
+    group: extras
+    group_order: 15
+    filters:
+      - or:
+          - regex: /\b(behind.the.scenes|bonus|extra|featurette|deleted.scenes)\b/i
+          - contains: "Special Features"
+          - contains: "DVD Extras"
+  
   # Movies directory - filters for movie content
   movies:
-    group_order: 30
-    group: media
+    group: movies
+    group_order: 20
     only_show_the_biggest_file: true
     filters:
       - regex: /.*/
-
+      
 # For advanced configuration options, see:
 # https://github.com/debridmediamanager/zurg-testing/wiki/Config
